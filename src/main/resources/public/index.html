@@ -146,7 +146,7 @@
 
     function renderResponse(data) {
         // Enrollment refused: fingerprint already matches an enrolled subject
-        if (data && 'subjectID' in data && 'score' in data) {
+        if (activeMode === 'enroll' && data && 'subjectID' in data && 'score' in data) {
             const typedID = document.getElementById('subjectID').value.trim();
             const score = data.score.toFixed(2);
             if (data.subjectID === typedID) {
@@ -156,11 +156,11 @@
             }
         }
         // Enrollment success: fingerprint enrolled with no matching subjects
-        else if (data && 'subjectID' in data && !('score' in data)) {
+        else if (activeMode === 'enroll' && data && 'subjectID' in data && !('score' in data)) {
             show('success', `<strong>Registration complete.</strong><br>Subject <strong>${esc(data.subjectID)}</strong> was enrolled.`);
         }
         // Verification: subject ID and score
-        else if (data && 'verified' in data && 'score' in data) {
+        else if (activeMode === 'verify' && data && 'verified' in data && 'score' in data) {
             const score = data.score.toFixed(2);
             if (data.verified) {
                 show('success', `<strong>Match confirmed! </strong><br>Score: <strong>${score}</strong>`);

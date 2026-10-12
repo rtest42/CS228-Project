@@ -132,6 +132,6 @@ All endpoints accept JSON. `image` is the Base64-encoded fingerprint image (TIFF
 - **Request size:** Javalin limits request bodies to 1 MB by default, which fits the FVC images but may not fit larger scans from a USB reader.
 - **Database connections:** `PGSimpleDataSource` opens a new connection per call. For heavier use, switch to a connection pool such as HikariCP.
 - **No security layer:** there is no authentication or HTTPS, so this is intended for local use only.
-- **No automated tests:** testing is manual via the webpage or the command-line client.
+- **No automated tests:** testing is manual via the web page or the command-line client.
 - **Unencrypted storage:** fingerprint templates are stored as plain bytes in PostgreSQL. A leaked database or backup would expose them. Do not use real fingerprints without adding encryption at rest.
 - **Single-node design:** the application and database run as single instances with no replication, failover, or sharding. Backups are not automated. Identification scales by scanning all templates, so it is limited by one machine's CPU and memory.
