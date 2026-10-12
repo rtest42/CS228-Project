@@ -172,7 +172,7 @@
         else if (activeMode === 'identify' && data && 'score' in data) {
             const score = data.score.toFixed(2);
             if (data.subjectID) {
-                show('success', `<strong>Best match: ${esc(data.subjectID)} 🎯</strong><br>Score: <strong>${score}</strong>`);
+                show('success', `<strong>Best match: ${esc(data.subjectID)} </strong><br>Score: <strong>${score}</strong>`);
             } else {
                 show('danger', `<strong>No match found.</strong><br>Best score ${score} was below the threshold.`);
             }

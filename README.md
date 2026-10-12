@@ -12,7 +12,7 @@ A Java web service for fingerprint enrollment, verification (1:1), and identific
 
 ## Requirements
 
-- Java 25 or later
+- Java 25
 - PostgreSQL
 - Internet access for Bootstrap CSS
 - Maven
@@ -92,7 +92,7 @@ identify <imagePath>
 To point the client at a different server:
 
 ```
-java -Dserver.url=http://localhost:9090/api fingerprintapp.Client identify 101_3.tif
+java -Dserver.url=http://localhost:9090 fingerprintapp.Client identify 101_3.tif
 ```
 
 ## HTTP API
