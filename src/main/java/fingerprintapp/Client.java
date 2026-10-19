@@ -74,7 +74,7 @@ public class Client {
                     quote(subjectID), image);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(SERVER_URL + "/" + endpoint))
+                    .uri(URI.create(SERVER_URL + endpoint))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
@@ -84,9 +84,9 @@ public class Client {
             System.out.printf("[%s -> %d]: %s%n", endpoint, response.statusCode(), response.body());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.err.printf("Request interrupted: %s%n", e.getMessage());
+            System.err.printf("Request interrupted: %s%n", e);
         } catch (IOException e) {
-            System.err.printf("Network or file error during verification: %s%n", e.getMessage());
+            System.err.printf("Network or file error during verification: %s%n", e);
         }
     }
 
@@ -126,7 +126,7 @@ public class Client {
                       enroll   <subjectID> <imagePath>
                       verify   <subjectID> <imagePath>
                       identify <imagePath>""");
-            return;
+            System.exit(1);
         }
 
         Client client = new Client();
@@ -134,7 +134,10 @@ public class Client {
             case "enroll" -> client.requestEnroll(args[1], args[2]);
             case "verify" -> client.requestVerify(args[1], args[2]);
             case "identify" -> client.requestIdentify(args[1]);
-            default -> System.err.printf("Unknown command: %s%n", args[0]);
+            default -> {
+                System.err.printf("Unknown command: %s%n", args[0]);
+                System.exit(1);
+            }
         }
     }
 }
