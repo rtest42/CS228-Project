@@ -35,7 +35,7 @@ projectJDK: "25" #(Applied in CI/CD pipeline)
 #bootstrap: sh ./prepare-qodana.sh
 
 # Execute build commands INSIDE the container sandbox to map external dependencies
-bootstrap: mvn clean initialize
+# bootstrap: mvn clean initialize
 
 #Install IDE plugins before Qodana execution (Applied in CI/CD pipeline)
 #plugins:
@@ -59,4 +59,4 @@ bootstrap: mvn clean initialize
   
 #Qodana supports other languages, for example, Python, JavaScript, TypeScript, Go, C#, PHP
 #For all supported languages see https://www.jetbrains.com/help/qodana/linters.html
-linter: jetbrains/qodana-jvm-community:2026.2
+#linter: jetbrains/qodana-jvm-community:2026.2
