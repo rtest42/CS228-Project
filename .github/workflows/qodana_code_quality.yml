@@ -58,4 +58,4 @@ jobs:
           # quick-fixes available in Ultimate and Ultimate Plus plans
           push-fixes: 'none'
           # Fixes the image warning and hooks up the exact container profile
-          args: --linter=qodana-jvm-community
+          args: --linter=qodana-jvm
