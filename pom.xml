@@ -7,13 +7,97 @@
     <groupId>org.example</groupId>
     <artifactId>CS228-Project</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <profiles>
+        <!-- Windows Configuration -->
+        <profile>
+            <id>windows-setup</id>
+            <activation>
+                <os><family>windows</family></os>
+            </activation>
+            <properties>
+                <python.system.executable>py</python.system.executable>
+                <venv.bin.dir>Scripts</venv.bin.dir>
+                <pip.executable>pip.exe</pip.executable>
+                <python.executable>python.exe</python.executable>
+            </properties>
+        </profile>
+
+        <!-- macOS, Linux Configuration -->
+        <profile>
+            <id>unix-setup</id>
+            <activation>
+                <os><family>unix</family></os>
+            </activation>
+            <properties>
+                <python.system.executable>python3</python.system.executable>
+                <venv.bin.dir>bin</venv.bin.dir>
+                <pip.executable>pip3</pip.executable>
+                <python.executable>python3</python.executable>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.4</version>
+                <executions>
+                    <!-- Automatically create .venv at the root if it doesn't exist -->
+                    <execution>
+                        <id>create-virtualenv</id>
+                        <phase>initialize</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>${python.system.executable}</executable>
+                            <arguments>
+                                <argument>-m</argument>
+                                <argument>venv</argument>
+                                <argument>${project.basedir}/.venv</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!-- Install dependencies from ml_pipeline/requirements.txt into the root .venv -->
+                    <execution>
+                        <id>install-python-packages</id>
+                        <phase>initialize</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>${project.basedir}/.venv/${venv.bin.dir}/${python.executable}</executable>
+                            <arguments>
+                                <argument>-m</argument>
+                                <argument>pip</argument>
+                                <argument>install</argument>
+                                <argument>--upgrade</argument>
+                                <argument>pip</argument>
+                                <argument>-r</argument>
+                                <argument>${project.basedir}/ml_pipeline/requirements.txt</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!-- Run the Python script using the local environment -->
+                    <execution>
+                        <id>run-ml-pipeline</id>
+                        <phase>compile</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>${project.basedir}/.venv/${venv.bin.dir}/${python.executable}</executable>
+                            <arguments>
+                                <argument>${project.basedir}/ml_pipeline/test.py</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
     <dependencies>
         <!-- Source: https://mvnrepository.com/artifact/com.machinezoo.sourceafis/sourceafis -->
         <dependency>
@@ -31,7 +115,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.13</version>
+            <version>42.7.14</version>
         </dependency>
         <!-- Source: https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
         <dependency>
