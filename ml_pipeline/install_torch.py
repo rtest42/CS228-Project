@@ -2,7 +2,9 @@ import platform
 import shutil
 import subprocess
 import sys
-from typing import FInal
+
+from pathlib import Path
+from typing import Final
 
 
 def detect_gpu_brand() -> str:
@@ -44,8 +46,9 @@ def detect_gpu_brand() -> str:
 
 def main() -> int:
     backend: Final[str] = detect_gpu_brand()
+    requirements_file: Final[Path] = Path(__file__).resolve().parent / f"requirements-{backend}.txt"
     result = subprocess.run(
-        [sys.executable, "-m", "pip", "install", "-r", f"requirements-{backend}.txt"],
+        [sys.executable, "-m", "pip", "install", "-r", str(requirements_file)],
         check=True
     )
     return result.returncode

@@ -1,0 +1,5 @@
+### Fingerprint datasets ###
+data/
+
+### Incomplete downloads ###
+*.part
