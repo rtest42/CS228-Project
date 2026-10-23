@@ -13,6 +13,7 @@ A Java web service for fingerprint enrollment, verification (1:1), and identific
 ## Requirements
 
 - Java 25
+- Python 3.15
 - PostgreSQL
 - Internet access for Bootstrap CSS
 - Maven

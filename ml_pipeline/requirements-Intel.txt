@@ -1,0 +1,4 @@
+--index-url https://download.pytorch.org/whl/xpu
+torch
+torchvision
+-r requirements.txt

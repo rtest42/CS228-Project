@@ -58,7 +58,7 @@
                             </arguments>
                         </configuration>
                     </execution>
-                    <!-- Install dependencies from ml_pipeline/requirements.txt into the root .venv -->
+                    <!-- Detect GPU and install the appropriate PyTorch build -->
                     <execution>
                         <id>install-python-packages</id>
                         <phase>initialize</phase>
@@ -66,25 +66,7 @@
                         <configuration>
                             <executable>${project.basedir}/.venv/${venv.bin.dir}/${python.executable}</executable>
                             <arguments>
-                                <argument>-m</argument>
-                                <argument>pip</argument>
-                                <argument>install</argument>
-                                <argument>--upgrade</argument>
-                                <argument>pip</argument>
-                                <argument>-r</argument>
-                                <argument>${project.basedir}/ml_pipeline/requirements.txt</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <!-- Run the Python script using the local environment -->
-                    <execution>
-                        <id>run-ml-pipeline</id>
-                        <phase>compile</phase>
-                        <goals><goal>exec</goal></goals>
-                        <configuration>
-                            <executable>${project.basedir}/.venv/${venv.bin.dir}/${python.executable}</executable>
-                            <arguments>
-                                <argument>${project.basedir}/ml_pipeline/test.py</argument>
+                                <argument>${project.basedir}/ml_pipeline/install_torch.py</argument>
                             </arguments>
                         </configuration>
                     </execution>

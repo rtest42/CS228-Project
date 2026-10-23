@@ -24,7 +24,7 @@ jobs:
       - name: 'Checkout Repository'
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
       - name: 'Set up JDK 25'
@@ -33,15 +33,6 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
-
-      - name: 'Set up Python 3.15'
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.15'
-
-      # Downloads all Java dependencies and sets up your python ecosystem safely on the host
-      - name: 'Bootstrap Project Dependencies'
-        run: mvn clean initialize
 
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2026.2
