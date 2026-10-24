@@ -150,7 +150,8 @@ def build_manifest() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     image_paths: list[Path] = sorted(
-        path for path in IMAGE_DIR.rglob("*")
+        path
+        for path in IMAGE_DIR.rglob("*")
         if path.is_file()
         and path.suffix.lower() in {".tif", ".tiff"}
     )

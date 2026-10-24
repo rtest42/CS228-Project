@@ -1,2 +1,4 @@
 numpy
 tqdm
+Pillow
+scikit-learn
