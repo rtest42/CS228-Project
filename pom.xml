@@ -111,5 +111,18 @@
             <artifactId>dotenv-java</artifactId>
             <version>3.2.0</version>
         </dependency>
+        <!-- DJL API -->
+        <dependency>
+            <groupId>ai.djl</groupId>
+            <artifactId>api</artifactId>
+            <version>0.39.0</version>
+        </dependency>
+        <!-- PyTorch Engine Provider -->
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-engine</artifactId>
+            <version>0.39.0</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 </project>
