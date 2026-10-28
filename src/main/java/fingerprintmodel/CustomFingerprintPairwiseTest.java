@@ -46,7 +46,7 @@ void main(String[] args) throws Exception {
     );
 
     final Path modelPath = Path.of(
-            "ml_pipeline/checkpoints/fingerprint_encoder.pt"
+            "ml_pipeline/checkpoints/fingerprint_encoder_enhanced.pt"
     );
     final Path pairsPath = Path.of(
             "ml_pipeline/data/pairwise_scores_baseline.csv"

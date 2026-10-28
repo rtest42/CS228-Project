@@ -19,7 +19,7 @@ SEED = 42
 BATCH_SIZE = 32
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-CHECKPOINT_PATH = PROJECT_ROOT / "checkpoints" / "siamese_best.pt"
+CHECKPOINT_PATH = PROJECT_ROOT / "checkpoints" / "siamese_best_enhanced.pt"
 
 
 def collect_distances(

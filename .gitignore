@@ -41,3 +41,6 @@ build/
 ### Environment Files ###
 .env
 /.venv/
+
+### Fingerprint enhancer repository ###
+FpEnhancer*/

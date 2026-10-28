@@ -7,8 +7,8 @@ from siamese_model import FingerprintEncoder
 
 
 ROOT: Final[Path] = Path(__file__).resolve().parent
-CHECKPOINT: Final[Path] = ROOT / "checkpoints" / "siamese_best.pt"
-OUTPUT: Final[Path] = ROOT / "checkpoints" / "fingerprint_encoder.pt"
+CHECKPOINT: Final[Path] = ROOT / "checkpoints" / "siamese_best_enhanced.pt"
+OUTPUT: Final[Path] = ROOT / "checkpoints" / "fingerprint_encoder_enhanced.pt"
 
 
 def main():

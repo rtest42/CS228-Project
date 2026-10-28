@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 private static final int THREADS = Runtime.getRuntime().availableProcessors();
 private static final String PREPEND_DIR = "ml_pipeline/";
-private static final Path MANIFEST = Paths.get(PREPEND_DIR + "data/manifest.csv");
+private static final Path MANIFEST = Paths.get(PREPEND_DIR + "data/manifest_enhanced.csv");
 private static final Path OUTPUT = Paths.get(PREPEND_DIR + "data/pairwise_scores_baseline.csv");
 private static final double MATCH_THRESHOLD = 40.0;
 

@@ -27,7 +27,10 @@ PATIENCE: Final[int] = 5
 
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parent
 CHECKPOINT_DIR: Final[Path] = PROJECT_ROOT / "checkpoints"
-BEST_MODEL_PATH: Final[Path] = CHECKPOINT_DIR / "siamese_best.pt"
+BEST_MODEL_PATH: Final[Path] = CHECKPOINT_DIR / "siamese_best_enhanced.pt"
+
+PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parent
+MANIFEST_PATH: Final[Path] = PROJECT_ROOT / "data" / "manifest_enhanced.csv"
 
 
 def set_seed(seed: int) -> None:
@@ -96,7 +99,7 @@ def main() -> None:
     device: torch.device = get_device()
     print(f"Using device: {device}", flush=True)
 
-    records: list[ImageRecord] = load_manifest()
+    records: list[ImageRecord] = load_manifest(MANIFEST_PATH)
     splits: dict[str, list[ImageRecord]] = split_by_impression(records, seed=SEED)
 
     train_pairs: list[FingerprintPair] = generate_pairs(splits["train"], seed=SEED)
