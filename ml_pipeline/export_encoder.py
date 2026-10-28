@@ -36,7 +36,7 @@ def main():
     encoder.load_state_dict(encoder_state_dict)
     encoder.eval()
 
-    example = torch.zeros(1, 1, 128, 128)
+    example = torch.zeros(1, 1, 256, 256)
 
     with torch.inference_mode():
         scripted_encoder = torch.jit.trace(encoder, example)

@@ -15,7 +15,7 @@ from torch.utils.data import Dataset
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parent
 MANIFEST_PATH: Final[Path] = PROJECT_ROOT / "data" / "manifest.csv"
 
-IMAGE_SIZE: Final[tuple[int, int]] = (128, 128)
+IMAGE_SIZE: Final[tuple[int, int]] = (256, 256)
 
 
 class ImageRecord(TypedDict):
@@ -197,7 +197,7 @@ def load_image(path: Path) -> torch.Tensor:
 
 class FingerprintPairDataset(Dataset):
     """PyTorch Dataset returning image pairs and binary labels."""
-    def __init__(self, pairs_: list[FingerprintPair]) -> None:
+    def __init__(self, pairs_: list[FingerprintPair]):
         self.pairs = pairs_
 
     def __len__(self) -> int:

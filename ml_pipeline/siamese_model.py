@@ -4,7 +4,7 @@ from torch import nn
 
 class FingerprintEncoder(nn.Module):
     """CNN that maps a grayscale fingerprint to an embedding."""
-    def __init__(self, embedding_dim: int = 128) -> None:
+    def __init__(self, embedding_dim: int = 128):
         super().__init__()
 
         self.features = nn.Sequential(
@@ -26,6 +26,11 @@ class FingerprintEncoder(nn.Module):
             nn.Conv2d(128, 128, kernel_size=3, padding=1),
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
+            nn.MaxPool2d(2),
+
+            nn.Conv2d(128, 128, kernel_size=3, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
         )
@@ -39,7 +44,7 @@ class FingerprintEncoder(nn.Module):
 
 class SiameseNetwork(nn.Module):
     """Two inputs processed by the same encoder."""
-    def __init__(self, embedding_dim: int = 128) -> None:
+    def __init__(self, embedding_dim: int = 128):
         super().__init__()
         self.encoder = FingerprintEncoder(embedding_dim)
 
@@ -52,7 +57,7 @@ class ContrastiveLoss(nn.Module):
     Label 1: same finger, minimize distance.
     Label 0: different fingers, separate by at least the margin.
     """
-    def __init__(self, margin: float = 1.0) -> None:
+    def __init__(self, margin: float = 1.0):
         super().__init__()
         self.margin = margin
 
