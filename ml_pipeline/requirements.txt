@@ -6,3 +6,4 @@ pyyaml
 easydict
 tensorboardX
 scikit-image
+matplotlib

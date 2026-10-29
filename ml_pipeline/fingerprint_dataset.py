@@ -14,13 +14,47 @@ from torch.utils.data import Dataset
 
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parent
 MANIFEST_PATH: Final[Path] = PROJECT_ROOT / "data" / "manifest.csv"
+ENHANCED_MANIFEST_PATH: Final[Path] = PROJECT_ROOT / "data" / "manifest_enhanced.csv"
+CHECKPOINT_DIR: Final[Path] = PROJECT_ROOT / "checkpoints"
+
+# Train, test, and export must agree on which images the model sees.
+# "raw" uses data/processed; "enhanced" uses the FpEnhancer output.
+VARIANTS: Final[tuple[str, ...]] = ("raw", "enhanced")
+DEFAULT_VARIANT: Final[str] = "enhanced"
+
+
+# FVC2000 DB1_B and DB2_B contain the same physical fingers captured on two
+# sensors: finger N in DB2_B is finger N in DB1_B (SourceAFIS matches 63% of
+# these cross-sensor pairs, vs. ~0% for other cross-database pairs). Such a
+# pair is not a true impostor, so it must not be used as a negative.
+SHARED_FINGER_DATABASES: Final[dict[str, str]] = {
+    "fvc2000/DB2_B": "fvc2000/DB1_B",
+}
+
+
+def physical_finger(finger_id: str) -> str:
+    """Map a finger_id to an ID shared by every capture of that finger."""
+    database, finger = finger_id.rsplit("/", 1)
+    return f"{SHARED_FINGER_DATABASES.get(database, database)}/{finger}"
+
+
+def manifest_for(variant: str) -> Path:
+    """Return the manifest path for a data variant."""
+    return ENHANCED_MANIFEST_PATH if variant == "enhanced" else MANIFEST_PATH
+
+
+def checkpoint_suffix(variant: str) -> str:
+    """Return the file-name suffix used for a variant's checkpoints."""
+    return "_enhanced" if variant == "enhanced" else ""
 
 IMAGE_SIZE: Final[tuple[int, int]] = (256, 256)
 
 
 class ImageRecord(TypedDict):
     image_path: Path
-    class_id: str
+    dataset: str
+    database: str
+    finger_id: str
     impression_id: int
 
 
@@ -46,7 +80,9 @@ def load_manifest(manifest_path: Path = MANIFEST_PATH) -> list[ImageRecord]:
                     if relative_path.is_absolute()
                     else PROJECT_ROOT / relative_path
                 ),
-                "class_id": row["class_id"],
+                "dataset": row["dataset"],
+                "database": row["database"],
+                "finger_id": row["finger_id"],
                 "impression_id": int(row["impression_id"]),
             })
 
@@ -78,7 +114,7 @@ def split_by_impression(records_: list[ImageRecord], seed: int = 42) -> dict[str
     grouped: dict[str, list[ImageRecord]] = defaultdict(list)
 
     for record in records_:
-        grouped[record["class_id"]].append(record)
+        grouped[record["finger_id"]].append(record)
 
     rng = random.Random(seed)
 
@@ -88,7 +124,7 @@ def split_by_impression(records_: list[ImageRecord], seed: int = 42) -> dict[str
         "test": [],
     }
 
-    for class_id, images in sorted(grouped.items()):
+    for finger_id, images in sorted(grouped.items()):
         images = sorted(
             images,
             key=lambda record__: record__["impression_id"],
@@ -97,13 +133,13 @@ def split_by_impression(records_: list[ImageRecord], seed: int = 42) -> dict[str
         impression_ids = [image["impression_id"] for image in images]
         if len(impression_ids) != len(set(impression_ids)):
             raise ValueError(
-                f"Duplicate impression IDs for {class_id}. "
+                f"Duplicate impression IDs for {finger_id}. "
                 "Check the manifest before splitting."
             )
 
         if len(images) < 8:
             raise ValueError(
-                f"{class_id} has only {len(images)} images; "
+                f"{finger_id} has only {len(images)} images; "
                 "this split requires at least 8."
             )
 
@@ -116,17 +152,25 @@ def split_by_impression(records_: list[ImageRecord], seed: int = 42) -> dict[str
     return splits_
 
 
-def generate_pairs(records_: list[ImageRecord], seed: int = 42) -> list[FingerprintPair]:
+def generate_pairs(
+        records_: list[ImageRecord],
+        seed: int = 42,
+        exclude_shared_fingers: bool = False,
+) -> list[FingerprintPair]:
     """
     Generate balanced positive and negative pairs.
 
     Label 1 = same finger.
     Label 0 = different fingers.
+
+    exclude_shared_fingers drops cross-sensor pairs of the same physical
+    finger (see SHARED_FINGER_DATABASES) from the negatives. It is off by
+    default so retraining reproduces this branch's earlier checkpoints.
     """
     grouped: dict[str, list[ImageRecord]] = defaultdict(list)
 
     for record in records_:
-        grouped[record["class_id"]].append(record)
+        grouped[record["finger_id"]].append(record)
 
     identities = sorted(grouped)
 
@@ -136,8 +180,8 @@ def generate_pairs(records_: list[ImageRecord], seed: int = 42) -> list[Fingerpr
     positive_pairs: list[FingerprintPair] = []
     negative_candidates: list[FingerprintPair] = []
 
-    for class_id in identities:
-        images = grouped[class_id]
+    for finger_id in identities:
+        images = grouped[finger_id]
 
         for image1_, image2_ in combinations(images, 2):
             positive_pairs.append({
@@ -148,6 +192,11 @@ def generate_pairs(records_: list[ImageRecord], seed: int = 42) -> list[Fingerpr
 
     for index, finger1 in enumerate(identities):
         for finger2 in identities[index + 1:]:
+            # Same finger on a different sensor: not a valid negative.
+            if (exclude_shared_fingers
+                    and physical_finger(finger1) == physical_finger(finger2)):
+                continue
+
             for image1_ in grouped[finger1]:
                 for image2_ in grouped[finger2]:
                     negative_candidates.append({

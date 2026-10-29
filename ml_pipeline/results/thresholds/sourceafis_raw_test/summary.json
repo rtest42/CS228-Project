@@ -1,0 +1,44 @@
+{
+  "scores": "data/pairwise_scores_raw.csv",
+  "split": "test",
+  "genuine_pairs": 120,
+  "impostor_pairs": 28520,
+  "excluded_cross_sensor_pairs": 40,
+  "excluded_cross_sensor_accepted": 26,
+  "operating_threshold": 40.0,
+  "at_operating_threshold": {
+    "tp": 83,
+    "fn": 37,
+    "fp": 1,
+    "tn": 28519,
+    "far": 3.506311360448808e-05,
+    "frr": 0.30833333333333335,
+    "precision": 0.9880952380952381,
+    "recall": 0.6916666666666667,
+    "f1": 0.8137254901960784,
+    "accuracy": 0.9986731843575419,
+    "balanced_accuracy": 0.8458158017765312
+  },
+  "eer": 0.08333917718560074,
+  "eer_threshold": 6.160789584807504,
+  "target_far": [
+    {
+      "target_far": 0.01,
+      "threshold": 14.228989565104271,
+      "far": 0.009992987377279102,
+      "frr": 0.13333333333333333
+    },
+    {
+      "target_far": 0.001,
+      "threshold": 24.185201977181542,
+      "far": 0.0009817671809256663,
+      "frr": 0.19166666666666668
+    },
+    {
+      "target_far": 0.0001,
+      "threshold": 38.10798115525867,
+      "far": 7.012622720897616e-05,
+      "frr": 0.2833333333333333
+    }
+  ]
+}

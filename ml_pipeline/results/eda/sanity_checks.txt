@@ -1,0 +1,10 @@
+960 images, 120 finger identities; impressions per finger: {8: 120}
+Byte-identical duplicate images: 0
+Distinct image sizes: 10 (databases with mixed sizes: none)
+Databases not at 500 dpi: [('FVC2002 DB2', 569), ('FVC2004 DB3', 512)]
+Synthetic (SFinGe) images: 240 (['FVC2000 DB4', 'FVC2002 DB4', 'FVC2004 DB4'])
+FVC2000 DB2: 2 low-foreground outlier(s) (< 0.47): 110_1.tif, 110_2.tif
+FVC2002 DB1: 1 low-foreground outlier(s) (< 0.27): 109_6.tif
+FVC2002 DB2: 1 low-foreground outlier(s) (< 0.27): 109_8.tif
+FVC2004 DB2: 4 low-foreground outlier(s) (< 0.18): 105_7.tif, 106_7.tif, 107_6.tif, 108_6.tif
+FVC2004 DB4: 7 low-foreground outlier(s) (< 0.37): 104_5.tif, 107_5.tif, 107_7.tif, 109_6.tif, 110_1.tif, 110_2.tif

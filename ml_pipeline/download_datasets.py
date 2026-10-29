@@ -1,6 +1,7 @@
 import csv
 import os
 import re
+import threading
 import urllib.request
 import zipfile
 
@@ -8,6 +9,12 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 from typing import Final, TypedDict
+
+# tqdm's default lock is a multiprocessing lock, which starts a helper
+# process. On macOS, starting a process after worker threads have used the
+# network crashes that helper (Python "quit unexpectedly" popups). The
+# progress bars are only shared across threads, so a thread lock suffices.
+tqdm.set_lock(threading.RLock())
 
 NUM_WORKERS: Final[int] = 4
 CHUNK_SIZE: Final[int] = 64 * 1024
@@ -20,41 +27,33 @@ MANIFEST_PATH: Final[Path] = DATA_DIR / "manifest.csv"
 
 # noinspection HttpUrlsUsage
 URLS: Final[list[str]] = [
-    "https://www.neurotechnology.com/download/CrossMatch_Sample_DB.zip"
+    f"http://bias.csr.unibo.it/{year}/Downloads/DB{i}_B.zip"
+    for year in ["fvc2000", "fvc2002", "fvc2004"]
+    for i in range(1, 5)
 ]
-# URLS: Final[list[str]] = [
-#    f"http://bias.csr.unibo.it/{year}/Downloads/DB{i}_B.zip"
-#    for year in ["fvc2000", "fvc2002", "fvc2004"]
-#    for i in range(1, 5)
-# ]
 
 FILENAME_PATTERN: Final[re.Pattern[str]] = re.compile(
-    r"^(?P<person>\d{3})_"
-    r"(?P<finger>\d+)_"
-    r"(?P<impression>\d+)\.(?:tif|tiff)$",
+    r"^(?P<finger>\d+)_(?P<impression>\d+)\.(?:tif|tiff)$",
     re.IGNORECASE,
 )
-# FILENAME_PATTERN: Final[re.Pattern[str]] = re.compile(
-#     r"^(?P<finger>\d+)_(?P<impression>\d+)\.(?:tif|tiff)$",
-#     re.IGNORECASE,
-# )
 
 
 class ManifestRow(TypedDict):
     image_path: str
-    # dataset: str
-    # database: str
     class_id: str
+    dataset: str
+    database: str
+    finger_id: str
     impression_id: int
 
 
 def download_file(url: str) -> Path:
     """Download a ZIP archive, reusing an existing valid archive."""
     parts: list[str] = url.split("/")
-    # year: str = parts[3]
+    year: str = parts[3]
     filename: str = parts[-1]
 
-    output_dir: Path = RAW_DIR  # / year
+    output_dir: Path = RAW_DIR / year
     output_dir.mkdir(parents=True, exist_ok=True)
 
     zip_path: Path = output_dir / filename
@@ -74,7 +73,7 @@ def download_file(url: str) -> Path:
 
             with open(temp_path, "wb") as f, tqdm(
                     total=total_size or None,
-                    desc=f"Download {filename}",
+                    desc=f"Download {year}/{filename}",
                     unit="B",
                     unit_scale=True,
                     unit_divisor=1024,
@@ -101,10 +100,10 @@ def download_file(url: str) -> Path:
 
 def extract_file(zip_path: Path) -> Path:
     """Extract a ZIP archive into its own dataset directory."""
-    # year: str = zip_path.parent.name
+    year: str = zip_path.parent.name
     database: str = zip_path.stem
 
-    output_dir: Path = IMAGE_DIR / database
+    output_dir: Path = IMAGE_DIR / year / database
     output_dir.mkdir(parents=True, exist_ok=True)
 
     try:
@@ -124,7 +123,7 @@ def extract_file(zip_path: Path) -> Path:
 
             with tqdm(
                 total=total_bytes,
-                desc=f"Extract {database}",
+                desc=f"Extract {year}/{database}",
                 unit="B",
                 unit_scale=True,
                 unit_divisor=1024,
@@ -167,9 +166,10 @@ def build_manifest() -> None:
 
     fields: list[str] = [
         "image_path",
-        # "dataset",
-        # "database",
         "class_id",
+        "dataset",
+        "database",
+        "finger_id",
         "impression_id",
     ]
 
@@ -186,17 +186,21 @@ def build_manifest() -> None:
                 unmatched.append(path)
                 continue
 
-            # year: str = path.parents[1].name
-            # database: str = path.parent.name
-            person: str = match.group("person")
+            year: str = path.parents[1].name
+            database: str = path.parent.name
             finger: str = match.group("finger")
             impression: int = int(match.group("impression"))
 
+            finger_id: str = f"{year}/{database}/finger_{finger}"
+
+            # class_id is the column the Java baseline reads; it names the
+            # same finger identity as finger_id.
             row: ManifestRow = {
                 "image_path": path.relative_to(PROJECT_ROOT).as_posix(),
-                # "dataset": dataset,  # year,
-                # "database": database,
-                "class_id": f"{person}_{finger}",
+                "class_id": finger_id,
+                "dataset": year,
+                "database": database,
+                "finger_id": finger_id,
                 "impression_id": impression
             }
 
@@ -205,11 +209,6 @@ def build_manifest() -> None:
 
     print(f"\nManifest: {MANIFEST_PATH}")
     print(f"Indexed TIFF images: {count}")
-    print(f"Unique classes: {len(set(
-        f'{m.group("person")}_{m.group("finger")}'
-        for p in image_paths
-        if (m := FILENAME_PATTERN.match(p.name))
-    ))}")
 
     if unmatched:
         print(f"\nWARNING: {len(unmatched)} filenames need inspection.")
