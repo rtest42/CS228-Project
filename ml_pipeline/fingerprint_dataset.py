@@ -20,9 +20,7 @@ IMAGE_SIZE: Final[tuple[int, int]] = (256, 256)
 
 class ImageRecord(TypedDict):
     image_path: Path
-    dataset: str
-    database: str
-    finger_id: str
+    class_id: str
     impression_id: int
 
 
@@ -48,9 +46,7 @@ def load_manifest(manifest_path: Path = MANIFEST_PATH) -> list[ImageRecord]:
                     if relative_path.is_absolute()
                     else PROJECT_ROOT / relative_path
                 ),
-                "dataset": row["dataset"],
-                "database": row["database"],
-                "finger_id": row["finger_id"],
+                "class_id": row["class_id"],
                 "impression_id": int(row["impression_id"]),
             })
 
@@ -82,7 +78,7 @@ def split_by_impression(records_: list[ImageRecord], seed: int = 42) -> dict[str
     grouped: dict[str, list[ImageRecord]] = defaultdict(list)
 
     for record in records_:
-        grouped[record["finger_id"]].append(record)
+        grouped[record["class_id"]].append(record)
 
     rng = random.Random(seed)
 
@@ -92,7 +88,7 @@ def split_by_impression(records_: list[ImageRecord], seed: int = 42) -> dict[str
         "test": [],
     }
 
-    for finger_id, images in sorted(grouped.items()):
+    for class_id, images in sorted(grouped.items()):
         images = sorted(
             images,
             key=lambda record__: record__["impression_id"],
@@ -101,13 +97,13 @@ def split_by_impression(records_: list[ImageRecord], seed: int = 42) -> dict[str
         impression_ids = [image["impression_id"] for image in images]
         if len(impression_ids) != len(set(impression_ids)):
             raise ValueError(
-                f"Duplicate impression IDs for {finger_id}. "
+                f"Duplicate impression IDs for {class_id}. "
                 "Check the manifest before splitting."
             )
 
         if len(images) < 8:
             raise ValueError(
-                f"{finger_id} has only {len(images)} images; "
+                f"{class_id} has only {len(images)} images; "
                 "this split requires at least 8."
             )
 
@@ -130,7 +126,7 @@ def generate_pairs(records_: list[ImageRecord], seed: int = 42) -> list[Fingerpr
     grouped: dict[str, list[ImageRecord]] = defaultdict(list)
 
     for record in records_:
-        grouped[record["finger_id"]].append(record)
+        grouped[record["class_id"]].append(record)
 
     identities = sorted(grouped)
 
@@ -140,8 +136,8 @@ def generate_pairs(records_: list[ImageRecord], seed: int = 42) -> list[Fingerpr
     positive_pairs: list[FingerprintPair] = []
     negative_candidates: list[FingerprintPair] = []
 
-    for finger_id in identities:
-        images = grouped[finger_id]
+    for class_id in identities:
+        images = grouped[class_id]
 
         for image1_, image2_ in combinations(images, 2):
             positive_pairs.append({

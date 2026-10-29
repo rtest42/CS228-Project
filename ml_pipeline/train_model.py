@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 import random
 import torch
@@ -27,10 +28,16 @@ PATIENCE: Final[int] = 5
 
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parent
 CHECKPOINT_DIR: Final[Path] = PROJECT_ROOT / "checkpoints"
-BEST_MODEL_PATH: Final[Path] = CHECKPOINT_DIR / "siamese_best_enhanced.pt"
+
+parser = argparse.ArgumentParser(description="Train Siamese Network on Fingerprints.")
+parser.add_argument("--enhanced", action="store_true", help="Use enhanced datasets and checkpoints.")
+args, _ = parser.parse_known_args()
+suffix = "_enhanced" if args.enhanced else ""
+
+BEST_MODEL_PATH: Final[Path] = CHECKPOINT_DIR / f"siamese_best{suffix}.pt"
 
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parent
-MANIFEST_PATH: Final[Path] = PROJECT_ROOT / "data" / "manifest_enhanced.csv"
+MANIFEST_PATH: Final[Path] = PROJECT_ROOT / "data" / f"manifest{suffix}.csv"
 
 
 def set_seed(seed: int) -> None:

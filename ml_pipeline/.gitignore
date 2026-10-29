@@ -1,8 +1,8 @@
 ### Fingerprint datasets ###
-data/
+data*/
 
 ### Fingerprint models ###
-checkpoints/
+checkpoints*/
 
 ### Incomplete downloads ###
 *.part

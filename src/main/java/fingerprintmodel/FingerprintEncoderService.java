@@ -23,7 +23,7 @@ import java.nio.file.Path;
  * that the embeddings are closer in the model's feature space.
  */
 public class FingerprintEncoderService implements AutoCloseable {
-    private static final float THRESHOLD = 0.362583f;
+    private final float THRESHOLD;
 
     private final Model model;
     private final Predictor<NDList, float[]> predictor;
@@ -36,9 +36,9 @@ public class FingerprintEncoderService implements AutoCloseable {
      * @param modelPath the filesystem path to the trained model
      * @throws Exception if the manager or model cannot be initialized or loaded
      */
-    public FingerprintEncoderService(Path modelPath) throws Exception {
+    public FingerprintEncoderService(Path modelPath, float threshold) throws Exception {
         manager = NDManager.newBaseManager();
-
+        THRESHOLD = threshold;
         model = Model.newInstance("fingerprint-encoder", "PyTorch");
         model.load(modelPath);
 

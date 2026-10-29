@@ -12,7 +12,9 @@
         <profile>
             <id>windows-setup</id>
             <activation>
-                <os><family>windows</family></os>
+                <os>
+                    <family>windows</family>
+                </os>
             </activation>
             <properties>
                 <python.system.executable>py</python.system.executable>
@@ -26,7 +28,9 @@
         <profile>
             <id>unix-setup</id>
             <activation>
-                <os><family>unix</family></os>
+                <os>
+                    <family>unix</family>
+                </os>
             </activation>
             <properties>
                 <python.system.executable>python3</python.system.executable>
@@ -35,50 +39,71 @@
                 <python.executable>python3</python.executable>
             </properties>
         </profile>
+
+        <profile>
+            <id>python-setup</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.6.4</version>
+                        <executions>
+                            <!-- Automatically create .venv at the root if it doesn't exist -->
+                            <execution>
+                                <id>create-virtualenv</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${python.system.executable}</executable>
+                                    <arguments>
+                                        <argument>-m</argument>
+                                        <argument>venv</argument>
+                                        <argument>${project.basedir}/.venv</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <!-- Detect GPU and install the appropriate PyTorch build -->
+                            <execution>
+                                <id>install-python-packages</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${project.basedir}/.venv/${venv.bin.dir}/${python.executable}
+                                    </executable>
+                                    <arguments>
+                                        <argument>${project.basedir}/ml_pipeline/install_requirements.py</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.16.0</version>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.6.1</version>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
     </profiles>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.6.4</version>
-                <executions>
-                    <!-- Automatically create .venv at the root if it doesn't exist -->
-                    <execution>
-                        <id>create-virtualenv</id>
-                        <phase>initialize</phase>
-                        <goals><goal>exec</goal></goals>
-                        <configuration>
-                            <executable>${python.system.executable}</executable>
-                            <arguments>
-                                <argument>-m</argument>
-                                <argument>venv</argument>
-                                <argument>${project.basedir}/.venv</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <!-- Detect GPU and install the appropriate PyTorch build -->
-                    <execution>
-                        <id>install-python-packages</id>
-                        <phase>initialize</phase>
-                        <goals><goal>exec</goal></goals>
-                        <configuration>
-                            <executable>${project.basedir}/.venv/${venv.bin.dir}/${python.executable}</executable>
-                            <arguments>
-                                <argument>${project.basedir}/ml_pipeline/install_requirements.py</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
     <properties>
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <junit.version>6.1.3</junit.version>
     </properties>
     <dependencies>
         <!-- Source: https://mvnrepository.com/artifact/com.machinezoo.sourceafis/sourceafis -->
@@ -123,6 +148,12 @@
             <artifactId>pytorch-engine</artifactId>
             <version>0.39.0</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>6.1.3</version>
+            <scope>test</scope> <!-- Ensures it stays out of production -->
         </dependency>
     </dependencies>
 </project>

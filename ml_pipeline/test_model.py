@@ -1,3 +1,4 @@
+import argparse
 import random
 from pathlib import Path
 
@@ -19,7 +20,13 @@ SEED = 42
 BATCH_SIZE = 32
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-CHECKPOINT_PATH = PROJECT_ROOT / "checkpoints" / "siamese_best_enhanced.pt"
+
+parser = argparse.ArgumentParser(description="Train Siamese Network on Fingerprints.")
+parser.add_argument("--enhanced", action="store_true", help="Use enhanced datasets and checkpoints.")
+args, _ = parser.parse_known_args()
+suffix = "_enhanced" if args.enhanced else ""
+
+CHECKPOINT_PATH = PROJECT_ROOT / "checkpoints" / f"siamese_best{suffix}.pt" # TOOD
 
 
 def collect_distances(

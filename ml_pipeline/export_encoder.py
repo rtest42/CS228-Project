@@ -1,3 +1,4 @@
+import argparse
 import torch
 
 from pathlib import Path
@@ -7,8 +8,13 @@ from siamese_model import FingerprintEncoder
 
 
 ROOT: Final[Path] = Path(__file__).resolve().parent
-CHECKPOINT: Final[Path] = ROOT / "checkpoints" / "siamese_best_enhanced.pt"
-OUTPUT: Final[Path] = ROOT / "checkpoints" / "fingerprint_encoder_enhanced.pt"
+parser = argparse.ArgumentParser(description="Train Siamese Network on Fingerprints.")
+parser.add_argument("--enhanced", action="store_true", help="Use enhanced datasets and checkpoints.")
+args, _ = parser.parse_known_args()
+suffix = "_enhanced" if args.enhanced else ""
+
+CHECKPOINT: Final[Path] = ROOT / "checkpoints" / f"siamese_best{suffix}.pt"
+OUTPUT: Final[Path] = ROOT / "checkpoints" / f"fingerprint_encoder{suffix}.pt"
 
 
 def main():
