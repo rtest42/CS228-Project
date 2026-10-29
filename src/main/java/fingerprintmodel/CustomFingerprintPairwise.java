@@ -1,8 +1,5 @@
 package fingerprintmodel;
 
-import fingerprintmodel.FingerprintEncoderService;
-import fingerprintmodel.FingerprintImageLoader;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -21,6 +18,10 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import me.tongfei.progressbar.ProgressBar;
+import me.tongfei.progressbar.ProgressBarBuilder;
+import me.tongfei.progressbar.ProgressBarStyle;
 
 public class CustomFingerprintPairwise {
     /**
@@ -81,26 +82,23 @@ public class CustomFingerprintPairwise {
         Map<String, float[]> embeddings = new HashMap<>();
 
         try (FingerprintEncoderService verifier =
-                     new FingerprintEncoderService(modelPath, 0.126875f)) {
+                     new FingerprintEncoderService(modelPath, 0.40f)) {
 
-            long encoded = 0;
+            try (ProgressBar bar = new ProgressBarBuilder()
+                    .setTaskName("Encoding images")
+                    .setInitialMax(uniquePaths.size())
+                    .setStyle(ProgressBarStyle.ASCII)
+                    .continuousUpdate()
+                    .build()) {
 
-            for (String imagePath : uniquePaths) {
-                float[] pixels = FingerprintImageLoader.load(imagePath);
-                float[] embedding = verifier.embed(pixels);
+                for (String imagePath : uniquePaths) {
+                    float[] pixels = FingerprintImageLoader.load(imagePath);
+                    float[] embedding = verifier.embed(pixels);
 
-                embeddings.put(imagePath, embedding);
-                encoded++;
-
-                if (encoded % 120 == 0 || encoded == uniquePaths.size()) {
-                    System.out.printf(
-                            "\rEncoded %,d / %,d images%n",
-                            encoded, uniquePaths.size()
-                    );
+                    embeddings.put(imagePath, embedding);
+                    bar.step();
                 }
             }
-
-            System.out.println();
 
             IO.println("Embedding extraction complete.");
 
@@ -123,95 +121,107 @@ public class CustomFingerprintPairwise {
                 );
                 writer.newLine();
 
-                ExecutorCompletionService<ChunkResult> completion =
-                        new ExecutorCompletionService<>(pool);
 
-                List<Pair> chunk = new ArrayList<>(chunkSize);
 
-                // Counts are updated only by the main thread.
-                long tp = 0;
-                long tn = 0;
-                long fp = 0;
-                long fn = 0;
-                long totalPairs = 0;
-                long completedPairs = 0;
-                int inFlight = 0;
+                long expectedPairs = countPairs(pairsPath);
 
-                String line;
+                try (ProgressBar bar = new ProgressBarBuilder()
+                        .setTaskName("Comparing pairs")
+                        .setInitialMax(expectedPairs)
+                        .setStyle(ProgressBarStyle.ASCII)
+                        .continuousUpdate()
+                        .build()) {
 
-                while ((line = reader.readLine()) != null) {
-                    if (line.isBlank()) {
-                        continue;
-                    }
+                    ExecutorCompletionService<ChunkResult> completion =
+                            new ExecutorCompletionService<>(pool);
 
-                    chunk.add(parsePair(line));
-                    totalPairs++;
+                    List<Pair> chunk = new ArrayList<>(chunkSize);
 
-                    if (chunk.size() == chunkSize) {
-                        List<Pair> batch = List.copyOf(chunk);
-                        chunk.clear();
+                    long tp = 0;
+                    long tn = 0;
+                    long fp = 0;
+                    long fn = 0;
+                    long totalPairs = 0;
+                    long completedPairs = 0;
+                    int inFlight = 0;
 
-                        completion.submit(
-                                compareChunk(batch, embeddings, verifier)
-                        );
-                        inFlight++;
+                    String line;
 
-                        // Apply backpressure so queued work stays bounded.
-                        if (inFlight >= maxInFlight) {
-                            ChunkResult result = getResult(completion);
-                            inFlight--;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.isBlank()) {
+                            continue;
+                        }
 
-                            writeRows(writer, result.rows());
+                        chunk.add(parsePair(line));
+                        totalPairs++;
 
-                            tp += result.tp();
-                            tn += result.tn();
-                            fp += result.fp();
-                            fn += result.fn();
-                            completedPairs += result.rows().size();
+                        if (chunk.size() == chunkSize) {
+                            List<Pair> batch = List.copyOf(chunk);
+                            chunk.clear();
 
-                            printProgress(completedPairs, totalPairs);
+                            completion.submit(
+                                    compareChunk(batch, embeddings, verifier)
+                            );
+                            inFlight++;
+
+                            // Apply backpressure so queued work stays bounded.
+                            if (inFlight >= maxInFlight) {
+                                ChunkResult result = getResult(completion);
+                                inFlight--;
+
+                                writeRows(writer, result.rows());
+
+                                tp += result.tp();
+                                tn += result.tn();
+                                fp += result.fp();
+                                fn += result.fn();
+
+                                int processed = result.rows().size();
+                                completedPairs += processed;
+                                bar.stepBy(processed);
+                            }
                         }
                     }
+
+                    // Submit the final partial chunk.
+                    if (!chunk.isEmpty()) {
+                        completion.submit(
+                                compareChunk(
+                                        List.copyOf(chunk), embeddings, verifier
+                                )
+                        );
+                        inFlight++;
+                    }
+
+                    // Consume every outstanding task.
+                    while (inFlight > 0) {
+                        ChunkResult result = getResult(completion);
+                        inFlight--;
+
+                        writeRows(writer, result.rows());
+
+                        tp += result.tp();
+                        tn += result.tn();
+                        fp += result.fp();
+                        fn += result.fn();
+
+                        int processed = result.rows().size();
+                        completedPairs += processed;
+                        bar.stepBy(processed);
+                    }
+
+                    writer.flush();
+
+                    if (completedPairs != totalPairs) {
+                        throw new IllegalStateException(
+                                "Pair count mismatch: read " + totalPairs
+                                        + ", completed " + completedPairs
+                        );
+                    }
+
+                    printStats(tp, tn, fp, fn);
                 }
 
-                System.out.println();
-
-                // Submit the final partial chunk.
-                if (!chunk.isEmpty()) {
-                    completion.submit(
-                            compareChunk(
-                                    List.copyOf(chunk), embeddings, verifier
-                            )
-                    );
-                    inFlight++;
-                }
-
-                // Consume every outstanding task.
-                while (inFlight > 0) {
-                    ChunkResult result = getResult(completion);
-                    inFlight--;
-
-                    writeRows(writer, result.rows());
-
-                    tp += result.tp();
-                    tn += result.tn();
-                    fp += result.fp();
-                    fn += result.fn();
-                    completedPairs += result.rows().size();
-
-                    printProgress(completedPairs, totalPairs);
-                }
-
-                writer.flush();
-
-                if (completedPairs != totalPairs) {
-                    throw new IllegalStateException(
-                            "Pair count mismatch: read " + totalPairs
-                                    + ", completed " + completedPairs
-                    );
-                }
-
-                printStats(tp, tn, fp, fn);
             } finally {
                 pool.shutdown();
 
@@ -460,19 +470,6 @@ public class CustomFingerprintPairwise {
     }
 
     /**
-     * Prints the current pair-processing progress.
-     *
-     * @param completed number of pairs fully processed
-     * @param totalRead number of pairs read from the input so far
-     */
-    private static void printProgress(long completed, long totalRead) {
-        System.out.printf(
-                "\rCompared %,d pairs; %,d pairs read%n",
-                completed, totalRead
-        );
-    }
-
-    /**
      * Removes optional surrounding CSV quotes and trims whitespace.
      *
      * @param value raw CSV field
@@ -512,6 +509,12 @@ public class CustomFingerprintPairwise {
         return denominator == 0
                 ? 0.0
                 : (double) numerator / denominator;
+    }
+
+    private static long countPairs(Path pairsPath) throws IOException {
+        try (var lines = Files.lines(pairsPath)) {
+            return Math.max(0, lines.count() - 1);
+        }
     }
 
     static void main(String[] args) throws Exception {

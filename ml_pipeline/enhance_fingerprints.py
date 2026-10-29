@@ -10,6 +10,7 @@ This is inference only; it does not train or modify the model.
 
 import csv
 from pathlib import Path
+from tqdm import tqdm
 from typing import Final
 
 import numpy as np
@@ -155,18 +156,19 @@ def main() -> None:
     succeeded = 0
     failed = 0
 
-    for index, image_path in enumerate(image_paths, start=1):
-        try:
-            output_path = enhance_image(model, image_path, device)
-            succeeded += 1
-            print(
-                f"[{index}/{len(image_paths)}] "
-                f"{image_path.relative_to(INPUT_DIR)} -> "
-                f"{output_path.relative_to(OUTPUT_DIR)}"
+    with tqdm(image_paths, desc="Enhancing fingerprints", unit="image", dynamic_ncols=True) as pbar:
+        for image_path in pbar:
+            try:
+                output_path = enhance_image(model, image_path, device)
+                succeeded += 1
+            except Exception as e:
+                failed += 1
+                tqdm.write(f"FAILED {image_path}: {e}")
+
+            pbar.set_postfix(
+                success=succeeded,
+                failed=failed
             )
-        except Exception as exc:
-            failed += 1
-            print(f"[{index}/{len(image_paths)}] FAILED {image_path}: {exc}")
 
     print(f"\nComplete. Success: {succeeded}; failed: {failed}")
     print(f"Outputs saved under: {OUTPUT_DIR}")
