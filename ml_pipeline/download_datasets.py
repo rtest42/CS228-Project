@@ -43,7 +43,6 @@ class ManifestRow(TypedDict):
     class_id: str
     dataset: str
     database: str
-    finger_id: str
     impression_id: int
 
 
