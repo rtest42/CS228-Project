@@ -1,0 +1,44 @@
+{
+  "scores": "data/cnn_test_distances.csv",
+  "split": "test",
+  "genuine_pairs": 120,
+  "impostor_pairs": 28520,
+  "excluded_cross_sensor_pairs": 40,
+  "excluded_cross_sensor_accepted": 0,
+  "operating_threshold": 0.454071,
+  "at_operating_threshold": {
+    "tp": 115,
+    "fn": 5,
+    "fp": 3216,
+    "tn": 25304,
+    "far": 0.11276297335203365,
+    "frr": 0.041666666666666664,
+    "precision": 0.03452416691684179,
+    "recall": 0.9583333333333334,
+    "f1": 0.06664734859461026,
+    "accuracy": 0.8875349162011174,
+    "balanced_accuracy": 0.9227851799906498
+  },
+  "eer": 0.075,
+  "eer_threshold": 0.332863,
+  "target_far": [
+    {
+      "target_far": 0.01,
+      "threshold": 0.094766,
+      "far": 0.009992987377279102,
+      "frr": 0.7416666666666667
+    },
+    {
+      "target_far": 0.001,
+      "threshold": 0.024748,
+      "far": 0.0009817671809256663,
+      "frr": 0.975
+    },
+    {
+      "target_far": 0.0001,
+      "threshold": 0.010663,
+      "far": 7.012622720897616e-05,
+      "frr": 0.9916666666666667
+    }
+  ]
+}

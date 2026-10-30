@@ -1,0 +1,8 @@
+numpy
+tqdm
+Pillow
+opencv-python
+pyyaml
+easydict
+tensorboardX
+matplotlib
