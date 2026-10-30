@@ -22,10 +22,10 @@ import org.jetbrains.annotations.NotNull;
 public class BaselineFingerprintPairwise {
     private static final int THREADS = Runtime.getRuntime().availableProcessors();
     private static final String PREPEND_DIR = "ml_pipeline/";
-    private static final String ENHANCED = (System.getProperty("enhanced") != null ? "_enhanced" : "");
+    private static final String ENHANCED = (Boolean.getBoolean("enhanced") ? "_enhanced" : "");
     private static final Path MANIFEST = Paths.get(PREPEND_DIR + "data/manifest" + ENHANCED + ".csv");
     private static final Path OUTPUT = Paths.get(PREPEND_DIR + "data/pairwise_scores_baseline.csv");
-    private static final double MATCH_THRESHOLD = 40.0;
+    private static final double MATCH_THRESHOLD = Double.parseDouble(System.getProperty("baseline_threshold", "40.0"));
 
     private static final LongAdder tp = new LongAdder();
     private static final LongAdder tn = new LongAdder();

@@ -52,10 +52,10 @@ Ensure you are in the project root directory `CS228-Project` before following th
 ### 1. Install required dependencies
 
 ```
-mvn compile
+mvn -Ppython-setup compile
 ```
 
-> Compiling will also install a Python virtual environment and install dependencies within the environment. See [`pom.xml`](../pom.xml) for more details.
+> The `-Ppython-setup` flag will also install a Python virtual environment and install dependencies within the environment. See [`pom.xml`](../pom.xml) for more details.
 
 ### 2. Activate the virtual environment
 
@@ -65,7 +65,7 @@ For Windows:
 .\.venv\Scripts\Activate.ps1
 ```
 
-For MacOS or Linux:
+For macOS or Linux:
 
 ```
 source .venv/bin/activate
@@ -105,10 +105,11 @@ python .\ml_pipeline\export_encoder.py
 
 ### 4. Perform baseline and experimental tests
 
-You may have to manually adjust the threshold value at around line 85 in [`CustomFingerprintPairwise.java`](../src/main/java/fingerprintmodel/CustomFingerprintPairwise.java).
+Use `-Dbaseline_threshold` to set the threshold of SourceAFIS (default 40.0).
 
+Use `-Dcustom_threshold` to set the threshold of the CNN model (default 0.40).
 ```
-mvn test
+mvn -Dbaseline_threshold=40.0 -Dcustom_threshold=0.381305 test
 ```
 
 ## Enhanced fingerprints (optional)
@@ -128,16 +129,34 @@ src/
   ...
 ```
 
+For Windows, macOS, or Linux:
+
+```
+git clone --depth 1 https://github.com/XiongjunGuan/FpEnhancer.git FpEnhancer_main
+```
+
 ### 2. Download PyTorch checkpoint file
 
-For UNet, download the `best.pth` file [here](https://github.com/XiongjunGuan/FpEnhancer/blob/main/ckpts/Enhancer/download.md). Move the file to the directory `ml_pipeline/data/checkpoints/`.
+For UNet, download the `best.pth` file [here](https://github.com/XiongjunGuan/FpEnhancer/blob/main/ckpts/Enhancer/download.md). Move the file to the directory `ml_pipeline/checkpoints/`.
+
+For Windows:
+
+```
+curl.exe -L "https://drive.google.com/file/d/1PGbC0dw1ev3ObjKRdcPw2yGyOOH5mloc/view?usp=drive_link" -o ml_pipeline/checkpoints/best.pth
+```
+
+For macOS or Linux:
+
+```
+curl -L "https://drive.google.com/file/d/1PGbC0dw1ev3ObjKRdcPw2yGyOOH5mloc/view?usp=drive_link" -o ml_pipeline/checkpoints/best.pth
+```
 
 ### 3. Generate enhanced fingerprints
 
 From the project root directory, run:
 
 ```
-python -m ml_pipeline.enhanced_fingerprints
+python -m ml_pipeline.enhance_fingerprints
 ```
 
 > A new `enhanced` folder will be created in `ml_pipeline/data/`.
@@ -147,8 +166,8 @@ python -m ml_pipeline.enhanced_fingerprints
 Use flags `-enhanced` or `-e` for Python and `-Denhanced` for Java.
 
 ```
-python --enhanced .\ml_pipeline\train_model.py
-python --enhanced .\ml_pipeline\test_model.py
-python --enhanced .\ml_pipeline\export_encoder.py
-mvn --Denhanced test
+python .\ml_pipeline\train_model.py --enhanced 
+python .\ml_pipeline\test_model.py --enhanced 
+python .\ml_pipeline\export_encoder.py --enhanced 
+mvn -Denhanced=true -Dbaseline_threshold=40.0 -Dcustom_threshold=0.421845 test
 ```

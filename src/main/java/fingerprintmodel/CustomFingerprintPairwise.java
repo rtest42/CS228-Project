@@ -48,7 +48,7 @@ public class CustomFingerprintPairwise {
                         + "/.djl.ai/pytorch/2.7.1-cu128-win-x86_64"
         );
 
-        final String enhanced = (System.getProperty("enhanced") != null ? "_enhanced" : "");
+        final String enhanced = (Boolean.getBoolean("enhanced") ? "_enhanced" : "");
         final Path modelPath = Path.of(
                 "ml_pipeline/checkpoints/fingerprint_encoder" + enhanced + ".pt"
         );
@@ -81,8 +81,10 @@ public class CustomFingerprintPairwise {
         // Load and encode each image exactly once.
         Map<String, float[]> embeddings = new HashMap<>();
 
+        final float threshold = Float.parseFloat(System.getProperty("custom_threshold", "0.40"));
+
         try (FingerprintEncoderService verifier =
-                     new FingerprintEncoderService(modelPath, 0.40f)) {
+                     new FingerprintEncoderService(modelPath, threshold)) {
 
             try (ProgressBar bar = new ProgressBarBuilder()
                     .setTaskName("Encoding images")

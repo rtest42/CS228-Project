@@ -5,5 +5,4 @@ opencv-python
 pyyaml
 easydict
 tensorboardX
-scikit-image
 matplotlib

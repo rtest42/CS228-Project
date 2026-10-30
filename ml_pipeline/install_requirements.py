@@ -46,14 +46,25 @@ def detect_gpu_brand() -> str:
 
 def main() -> int:
     backend: Final[str] = detect_gpu_brand()
-    requirements_file: Final[Path] = Path(__file__).resolve().parent / f"requirements-{backend}.txt"
+    requirements_file: Final[Path] = Path(__file__).resolve().parent / "requirements.txt"
+    requirements_file2: Final[Path] = Path(__file__).resolve().parent / f"requirements-{backend}.txt"
+
     result = subprocess.run(
         [sys.executable, "-m", "pip", "install", "-r", str(requirements_file)],
         check=True
     )
+
+    if result.returncode != 0:
+        return result.returncode
+
+    result = subprocess.run(
+        [sys.executable, "-m", "pip", "install", "-r", str(requirements_file2)],
+        check=True
+    )
+
     return result.returncode
 
 
 if __name__ == "__main__":
-    exit_code = main()
+    exit_code: int = main()
     sys.exit(exit_code)

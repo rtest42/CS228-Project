@@ -66,6 +66,24 @@ DB_PASSWORD=<your_password>
 
 Run `fingerprintapp.Server` from your IDE (or your build tool). The default port is 8080.
 
+Alternatively, run the server from the command line.
+
+For Windows:
+
+```
+mvn dependency:build-classpath -Dmdep.outputFile=classpath.txt
+java -cp "target/classes;$(Get-Content classpath.txt)" fingerprintapp.Server
+```
+
+For macOS or Linux:
+
+```
+mvn dependency:build-classpath -Dmdep.outputFile=classpath.txt
+java -cp "target/classes;$(cat classpath.txt)" fingerprintapp.Server
+```
+
+
+
 Open `http://localhost:8080/` in a browser.
 
 ## Using the web page
@@ -84,11 +102,18 @@ verify   <subjectID> <imagePath>
 identify <imagePath>
 ```
 
-To point the client at a different server:
+Example for Windows:
 
 ```
-java fingerprintapp.Client identify 101_3.tif
+java -cp "target/classes;$(Get-Content classpath.txt)" fingerprintapp.Client identify 101_3.tif
 ```
+
+Example for macOS or Linux:
+
+```
+java -cp "target/classes;$(cat classpath.txt)" fingerprintapp.Client identify 101_3.tif
+```
+
 
 ## HTTP API
 
