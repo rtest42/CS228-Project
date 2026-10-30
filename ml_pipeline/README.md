@@ -79,6 +79,12 @@ Configure `URLS` and `FILENAME_PATTERN` to specify datasets to download and auto
 python .\ml_pipeline\download_datasets.py
 ```
 
+### 4. Prepare and preprocess datasets
+
+```
+python .\ml_pipeline\fingerprint_dataset.py
+```
+
 ## Training and testing the custom model
 
 Ensure you are in the project root directory `CS228-Project` before following the following steps.
