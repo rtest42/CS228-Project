@@ -2,9 +2,6 @@
 Run the original FpEnhancer Enhancer model on every image listed in
 data/manifest.csv and save results to data/enhanced/, preserving paths.
 
-Place this file in the root of the cloned XiongjunGuan/FpEnhancer repository,
-where the `models/` directory and `best.pth` are available.
-
 This is inference only; it does not train or modify the model.
 """
 
@@ -18,6 +15,7 @@ import torch
 from PIL import Image
 from FpEnhancer_main.models.Enhancer import Enhancer
 
+from ml_pipeline.device import get_device
 
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parent
 MANIFEST_PATH: Final[Path] = PROJECT_ROOT / "data" / "manifest.csv"
@@ -142,7 +140,7 @@ def enhance_image(
 
 
 def main() -> None:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = get_device()
     print(f"Device: {device}")
     print(f"Checkpoint: {MODEL_PATH}")
     print(f"Manifest: {MANIFEST_PATH}")
