@@ -79,12 +79,6 @@ Configure `URLS` and `FILENAME_PATTERN` to specify datasets to download and auto
 python .\ml_pipeline\download_datasets.py
 ```
 
-### 4. Prepare and preprocess datasets
-
-```
-python .\ml_pipeline\fingerprint_dataset.py
-```
-
 ## Training and testing the custom model
 
 Ensure you are in the project root directory `CS228-Project` before following the following steps.
@@ -117,6 +111,8 @@ Use `-Dcustom_threshold` to set the threshold of the CNN model (default 0.40).
 ```
 mvn -Dbaseline_threshold=40.0 -Dcustom_threshold=0.381305 test
 ```
+
+> If one or more tests fail, the issue may be that `pairwise_scores_baseline.csv` was not found. The baseline test generates this CSV file and must run before the other tests. If this happens, rerun the tests.
 
 ## Enhanced fingerprints (optional)
 
