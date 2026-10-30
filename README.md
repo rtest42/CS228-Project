@@ -34,10 +34,9 @@ src/main/resources/
   database-init.sql    Database schema
 ```
 
-## ML Pipeline
+## Machine Learning Pipeline
 
-For info on setting up, training, and running the models and tests, look at the readme within the `ml_pipeline` directory
-
+For info on setting up, training, and running the models and tests, look at the README within the [`ml_pipeline`](ml_pipeline) directory.
 
 ## Setup
 
