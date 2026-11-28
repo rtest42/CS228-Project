@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/065/L/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/065/R/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/076/L/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/076/R/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/113/L/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/113/R/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/114/L/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/114/R/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/175/L/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/175/R/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/194/L/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/194/R/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/296/L/Thumbs.db" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/data/CASIA-FingerprintV5(BMP)/296/R/Thumbs.db" dialect="GenericSQL" />
     <file url="PROJECT" dialect="PostgreSQL" />
   </component>
 </project>

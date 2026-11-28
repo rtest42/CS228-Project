@@ -7,98 +7,6 @@
     <groupId>edu.sjsu.cs228</groupId>
     <artifactId>cs228-project</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <profiles>
-        <!-- Windows Configuration -->
-        <profile>
-            <id>windows-setup</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                </os>
-            </activation>
-            <properties>
-                <python.system.executable>py</python.system.executable>
-                <venv.bin.dir>Scripts</venv.bin.dir>
-                <pip.executable>pip.exe</pip.executable>
-                <python.executable>python.exe</python.executable>
-            </properties>
-        </profile>
-
-        <!-- macOS, Linux Configuration -->
-        <profile>
-            <id>unix-setup</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                </os>
-            </activation>
-            <properties>
-                <python.system.executable>python3</python.system.executable>
-                <venv.bin.dir>bin</venv.bin.dir>
-                <pip.executable>pip3</pip.executable>
-                <python.executable>python3</python.executable>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>python-setup</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.6.4</version>
-                        <executions>
-                            <!-- Automatically create .venv at the root if it doesn't exist -->
-                            <execution>
-                                <id>create-virtualenv</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>${python.system.executable}</executable>
-                                    <arguments>
-                                        <argument>-m</argument>
-                                        <argument>venv</argument>
-                                        <argument>${project.basedir}/.venv</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                            <!-- Detect GPU and install the appropriate PyTorch build -->
-                            <execution>
-                                <id>install-python-packages</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>${project.basedir}/.venv/${venv.bin.dir}/${python.executable}
-                                    </executable>
-                                    <arguments>
-                                        <argument>${project.basedir}/ml_pipeline/install_requirements.py</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.16.0</version>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.6.1</version>
-                    </plugin>
-
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
     <properties>
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
@@ -116,13 +24,13 @@
         <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
-            <version>7.2.3</version>
+            <version>7.3.0</version>
         </dependency>
         <!-- Source: https://mvnrepository.com/artifact/org.postgresql/postgresql -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.14</version>
+            <version>42.7.15</version>
         </dependency>
         <!-- Source: https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
         <dependency>
@@ -136,19 +44,6 @@
             <artifactId>dotenv-java</artifactId>
             <version>3.2.0</version>
         </dependency>
-        <!-- DJL API -->
-        <dependency>
-            <groupId>ai.djl</groupId>
-            <artifactId>api</artifactId>
-            <version>0.39.0</version>
-        </dependency>
-        <!-- PyTorch Engine Provider -->
-        <dependency>
-            <groupId>ai.djl.pytorch</groupId>
-            <artifactId>pytorch-engine</artifactId>
-            <version>0.39.0</version>
-            <scope>runtime</scope>
-        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -160,6 +55,12 @@
             <groupId>me.tongfei</groupId>
             <artifactId>progressbar</artifactId>
             <version>0.10.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jline</groupId>
+                    <artifactId>jline-native</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>compile</scope>
         </dependency>
     </dependencies>

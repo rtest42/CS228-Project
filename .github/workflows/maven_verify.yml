@@ -1,4 +1,4 @@
-name: Maven Java & Python Compilation Verify
+name: Maven Java Compilation Verify
 
 on:
   push:
@@ -20,11 +20,6 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
-
-      - name: 'Set up Python 3.15'
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.15'
 
       - name: 'Build and Compile Project with Maven'
         run: mvn clean compile
