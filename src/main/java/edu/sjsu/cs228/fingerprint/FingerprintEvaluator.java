@@ -7,6 +7,10 @@ import me.tongfei.progressbar.ConsoleProgressBarConsumer;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarStyle;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -153,6 +157,16 @@ public class FingerprintEvaluator {
         System.out.printf("EER ≈ %.4f%% at threshold %d%n", eer * 100, eerT);
     }
 
+    static void saveHistograms(Histograms h, Path file) throws IOException {
+        Files.createDirectories(file.toAbsolutePath().getParent());
+        try (BufferedWriter w = Files.newBufferedWriter(file)) {
+            w.write("score,genuine,impostor\n");
+            for (int b = 0; b < BUCKETS; b++)
+                if (h.genuine()[b] != 0 || h.impostor()[b] != 0)
+                    w.write(b + "," + h.genuine()[b] + "," + h.impostor()[b] + "\n");
+        }
+    }
+
     static void main(String[] args) throws Exception {
         Dotenv dotenv = Dotenv.load();
         String dbHost = dotenv.get("DB_HOST", "localhost");
@@ -173,5 +187,7 @@ public class FingerprintEvaluator {
         printConfusionMatrix(h, 40); // SourceAFIS docs: 40 ≈ 0.01% FMR
         printConfusionMatrix(h, 30);
         printConfusionMatrix(h, 60);
+
+        saveHistograms(h, Path.of("results", dataset + ".csv"));
     }
 }
